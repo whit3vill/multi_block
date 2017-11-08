@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <openssl/md5.h>
+#include "multi_block.h"
 
 struct bintree {
 	int key;
@@ -33,20 +30,59 @@ struct bintree *search (struct bintree *root, int val) {
 	else if (val == root->key)	return root;
 }
 
-void hash() {
+int myhash(const char *string) {
 	int i;
+	int num = 0;
 
-	const char *string = "asdfasdf";
 	unsigned char result[MD5_DIGEST_LENGTH];
 
 	MD5(string, strlen(string), result);
 
-	for (i=0; i<8; i++)
+	for (i=0; i<4; i++) {
 		printf("%02x", result[i]);
+		num += (int)(result[i]) * (int)(pow((double)(16), (double)(6-2*(i))));
+	}
 	printf("\n");
-}
 
-void main () {
+	return num;
+}
+const char* getfield(char* line, int num)
+{
+    const char* tok;
+    for (tok = strtok(line, ",");
+            tok && *tok;
+            tok = strtok(NULL, ",\n"))
+    {
+        if (!--num)
+            return tok;
+    }
+    return NULL;
+}
+void main (int argc, char *argv[]) {
+	char *filename;
+	FILE *fp;
+	char buf[BUFSIZE];
+	char *string;
+
+	filename = argv[1];
+	fp = fopen (filename, "r");
+	if (fp == NULL)	printf("No %s in directory.\n", filename);
+
+	while (fgets(buf, BUFSIZE, fp)) {
+        char* tmp = strdup(buf);
+        //strncpy(string, getfield(tmp, 2), strlen(getfield(tmp, 2)));
+        // NOTE strtok clobbers tmp
+        
+        ////
+        printf("%s\n", getfield(tmp, 2));
+        string = "asdf";
+
+        ////
+        printf("%s\n", string);
+        printf("%d\n", myhash(string));
+        free(tmp);
+    }
+
 	insert(&root, 9);
 	insert(&root, 4);
 	insert(&root, 15);
@@ -55,6 +91,5 @@ void main () {
     insert(&root, 17);
     insert(&root, 2);
 
-    hash();
 }
 
