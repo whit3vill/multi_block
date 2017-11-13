@@ -33,10 +33,10 @@ int myhash(const char *string) {
    MD5(string, strlen(string), result);
 
    for (i=0; i<16; i++) {
-      printf("%02x", result[i]);
+      //printf("%02x", result[i]);
       num += (int)(result[i]) * (int)(pow((double)(16), (double)(4-2*(i))));
    }
-   printf("\n");
+   //printf("\n");
 
    return num;
 }
@@ -110,6 +110,7 @@ void filter (unsigned char* buf) {
     char *addr;
     char *addr2;
     char *url;
+    int i;
 
     ipH = (struct ip *)buf;
     if (ipH->ip_p == IPPROTO_TCP) {
@@ -117,19 +118,21 @@ void filter (unsigned char* buf) {
         data = (unsigned char *)tcpH + 4*(tcpH->th_off);
         //printf("%s",data);
         if (IsHttp(data)) {
-          printf("1\n");
-            if (strstr(data, "Host: ")) {
-              printf("2\n");
-                addr = strstr(data, "www.");
-                addr2 = strstr(addr, "\r");
-                printf("3\n");
-                //printf("%d\n", strlen(addr)-strlen(addr2));
-                url = (char *)malloc(strlen(addr)-strlen(addr2));
-                strncpy(url, addr+4, strlen(addr)-strlen(addr2)-4);
-                printf("%s\n", url);
-                if(search(url)) {
-                    flag = 0;
-                }
+            if (addr=strstr(data, "Host: ")) {
+              i = 0;
+              while (addr[i++] != '\r');
+              if (addr[6]=='w' && addr[7]=='w' && addr[8]=='w' && addr[9]=='.') {
+                url = (char *)malloc(sizeof(char)*(i-11));
+                strncpy(url, addr+10, i-11);
+              }
+              else {
+                url = (char *)malloc(sizeof(char)*(i-7));
+                strncpy(url, addr+6, i-7);
+              }
+              printf("%s\n", url);
+              if(search(url)) {
+                flag = 0;
+              }
             }
         }
     }
@@ -207,7 +210,7 @@ void main (int argc, char *argv[]) {
          count++;
          if (count == 2) {
             string[strlen(string)-2] = 0;
-            printf("%s\n", string);
+            //printf("%s\n", string);
             insert(string);
          }
          string = strtok(NULL, ",");
