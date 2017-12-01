@@ -4,7 +4,7 @@ struct hashtable *array = NULL;
 int flag = 1;
 
 struct hashindex {
-   char url[30];
+   char url[100];
    struct hashindex *next;
 };
 
@@ -25,19 +25,18 @@ struct hashindex *create (char *url) {
 int myhash(const char *string) {
    int i;
    unsigned int num = 0;
-
    unsigned char result[MD5_DIGEST_LENGTH];
-
-
 
    MD5(string, strlen(string), result);
 
    for (i=0; i<16; i++) {
-      //printf("%02x", result[i]);
+      printf("%02x", result[i]);
+   }
+   printf("\n");
+   for (i=0; i<3; i++) {
       num += (int)(result[i]) * (int)(pow((double)(16), (double)(4-2*(i))));
    }
-   //printf("\n");
-
+   
    return num;
 }
 
@@ -56,6 +55,7 @@ void insert (char *url) {
   array[index].count++;
   return;
 }
+
 int search (char *url) {
   int index = myhash(url);
   int flag = 0;
@@ -136,7 +136,7 @@ void filter (unsigned char* buf) {
             }
         }
     }
-    //free(url);
+    free(url);
 }
 static u_int32_t print_pkt (struct nfq_data *tb)
 {
@@ -209,8 +209,8 @@ void main (int argc, char *argv[]) {
       while (string) {
          count++;
          if (count == 2) {
-            string[strlen(string)-2] = 0;
-            //printf("%s\n", string);
+            string[strlen(string)-1] = 0;
+            printf("%s\n", string);
             insert(string);
          }
          string = strtok(NULL, ",");
@@ -229,6 +229,7 @@ void main (int argc, char *argv[]) {
     printf("unbinding existing nf_queue handler for AF_INET (if any)\n");
     if (nfq_unbind_pf(h, AF_INET) < 0) {
         fprintf(stderr, "error during nfq_unbind_pf()\n");
+
         exit(1);
     }
 
